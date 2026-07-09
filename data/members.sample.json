@@ -1,0 +1,10 @@
+{
+  "_note": "動作確認用の架空の名簿です。実際の熊谷市議会の議員名簿(定数30)は市公式サイトの『各種議員名簿』(https://www.city.kumagaya.lg.jp/shigikai/meibo/kakushumeibo.html)のPDFを参照し、同じ形式で data/members.json を作成してください。",
+  "term": "サンプル",
+  "members": [
+    { "name": "青木一郎", "kaiha": "サンプル会派A", "seat": 12 },
+    { "name": "佐野花子", "kaiha": "サンプル会派B", "seat": 7 },
+    { "name": "高橋健二", "kaiha": "サンプル会派A", "seat": 3 },
+    { "name": "中村三郎", "kaiha": "無会派", "seat": 5 }
+  ]
+}

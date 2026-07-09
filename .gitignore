@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+data/minutes/
+data/members.json
+data/votes.csv
+reports/
