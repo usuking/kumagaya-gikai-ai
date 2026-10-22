@@ -1,0 +1,882 @@
+<title>消防指令センター共同運用</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Shippori+Mincho:wght@500;600;700&display=swap">
+<style>
+/* Layout: 濃色マストヘッド → 読み幅680pxの一段組。数字タイル・図解・表は読み幅を少しはみ出す広め枠 */
+:root {
+  --bg: #F6F7F6;
+  --surface: #E4ECEE;
+  --card: #FFFFFF;
+  --ink: #232827;
+  --muted: #565E5B;
+  --primary: #2C5560;
+  --on-primary: #FFFFFF;
+  --accent: #E08A4B;
+  --accent-tint: #F7E9DA;
+  --band: #163840;
+  --on-dark: #FFFFFF;
+  --on-dark-muted: #C2CDCE;
+  --line: #D4D8D7;
+  --font-display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-body: "Noto Sans JP", "Hiragino Sans", "Yu Gothic", system-ui, sans-serif;
+  --font-num: ui-monospace, Menlo, Consolas, monospace;
+  --read: 680px;
+  --wide: 960px;
+  --radius: 8px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #101718; --surface: #1A2629; --card: #152023; --ink: #E5EBEA; --muted: #A2ADAB;
+    --primary: #8BBFCB; --on-primary: #0B1F24; --accent: #E59A63; --accent-tint: #3A2A1E;
+    --band: #0B1F24; --on-dark: #FFFFFF; --on-dark-muted: #B7C4C5; --line: #2D3B3E;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #101718; --surface: #1A2629; --card: #152023; --ink: #E5EBEA; --muted: #A2ADAB;
+  --primary: #8BBFCB; --on-primary: #0B1F24; --accent: #E59A63; --accent-tint: #3A2A1E;
+  --band: #0B1F24; --on-dark: #FFFFFF; --on-dark-muted: #B7C4C5; --line: #2D3B3E;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.9;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap {
+  width: 100%;
+  max-width: var(--read);
+  margin-inline: auto;
+}
+.wrap-wide {
+  width: 100%;
+  max-width: var(--wide);
+  margin-inline: auto;
+}
+.gutter {
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+
+/* マストヘッド */
+.masthead {
+  background: var(--band);
+  color: var(--on-dark);
+}
+.masthead .inner {
+  padding-block: 48px 40px;
+  display: grid;
+  gap: 16px;
+}
+.kicker {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+.masthead h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(26px, 5.4vw, 38px);
+  line-height: 1.45;
+  margin: 0;
+  text-wrap: balance;
+}
+.masthead .sub {
+  color: var(--on-dark-muted);
+  margin: 0;
+  max-width: 36em;
+}
+.masthead .source {
+  font-size: 13px;
+  color: var(--on-dark-muted);
+  border-top: 1px solid rgba(255,255,255,0.18);
+  padding-top: 12px;
+  margin: 0;
+}
+
+main { padding-block: 40px 64px; display: grid; gap: 56px; }
+
+/* 3行まとめ */
+.summary {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+.summary h2 { margin-top: 0; }
+.summary ol {
+  margin: 0;
+  padding-left: 1.4em;
+  display: grid;
+  gap: 8px;
+}
+.summary li::marker { color: var(--primary); font-weight: 700; }
+
+/* 数字タイル */
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+}
+.tile {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+.tile .label { font-size: 13px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
+.tile .value {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 26px;
+  line-height: 1.3;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+.tile .value small { font-size: 15px; color: var(--ink); font-weight: 600; }
+.tile .note { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+@media (max-width: 720px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* 見出し */
+section { display: grid; gap: 16px; }
+h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 23px;
+  line-height: 1.5;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-wrap: balance;
+}
+h2::before {
+  content: "";
+  flex: none;
+  width: 22px;
+  height: 3px;
+  background: var(--primary);
+}
+h3 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 18px;
+  margin: 0;
+}
+p { margin: 0; }
+ul { margin: 0; padding-left: 1.3em; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; line-height: 1.7; }
+strong { font-weight: 700; }
+.mark { background: linear-gradient(transparent 62%, var(--accent-tint) 62%); }
+
+/* たとえ話 */
+.analogy {
+  background: var(--accent-tint);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: grid;
+  gap: 4px;
+}
+.analogy .tag { font-size: 12.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--muted); }
+
+/* ビフォー・アフター図 */
+.flow {
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) auto minmax(0, 1fr);
+  gap: 16px;
+  align-items: center;
+}
+.flow .col { display: grid; gap: 8px; min-width: 0; }
+.flow .col-title { font-size: 13px; font-weight: 700; color: var(--muted); letter-spacing: 0.06em; }
+.center-box {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 10px 14px;
+  display: grid;
+  gap: 2px;
+}
+.center-box .name { font-weight: 700; font-size: 14.5px; line-height: 1.5; }
+.center-box .area { font-size: 12.5px; color: var(--muted); line-height: 1.6; }
+.center-box.is-kumagaya { border-color: var(--primary); border-width: 2px; }
+.center-box.new {
+  background: var(--primary);
+  color: var(--on-primary);
+  border: none;
+  padding: 20px;
+  gap: 6px;
+}
+.center-box.new .area { color: var(--on-primary); opacity: 0.85; }
+.center-box.new .name { font-family: var(--font-display); font-size: 18px; }
+.arrow {
+  font-size: 28px;
+  color: var(--primary);
+  font-weight: 700;
+  line-height: 1;
+}
+@media (max-width: 640px) {
+  .flow { grid-template-columns: minmax(0, 1fr); }
+  .arrow { transform: rotate(90deg); justify-self: center; }
+}
+
+/* 決定事項リスト */
+.decisions {
+  display: grid;
+  border-top: 1px solid var(--line);
+}
+.decision {
+  display: grid;
+  grid-template-columns: 9em minmax(0, 1fr);
+  gap: 4px 20px;
+  padding-block: 14px;
+  border-bottom: 1px solid var(--line);
+}
+.decision dt { font-weight: 700; color: var(--primary); font-size: 14.5px; line-height: 1.7; }
+.decision dd { margin: 0; display: grid; gap: 2px; min-width: 0; }
+.decision .what { font-weight: 500; }
+.decision .why { font-size: 14px; color: var(--muted); line-height: 1.75; }
+@media (max-width: 560px) { .decision { grid-template-columns: minmax(0, 1fr); } }
+
+/* 表 */
+.table-scroll {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--card);
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 14px;
+  line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+th, td {
+  padding: 10px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: right;
+  vertical-align: top;
+  white-space: nowrap;
+}
+th:first-child, td:first-child { text-align: left; }
+thead th {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface);
+  letter-spacing: 0.02em;
+}
+tbody th { font-weight: 700; }
+tr.is-kumagaya { background: var(--accent-tint); }
+tr.total th, tr.total td { font-weight: 700; border-bottom: none; }
+td .pct { display: block; font-size: 12px; color: var(--muted); }
+td.wrap-cell { white-space: normal; min-width: 12em; text-align: left; font-size: 13px; }
+td.key, th.key { background: var(--surface); font-weight: 700; color: var(--primary); }
+tr.is-kumagaya td.key { background: transparent; }
+
+/* 費用の分け方 */
+.cost-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+}
+@media (max-width: 640px) { .cost-grid { grid-template-columns: minmax(0, 1fr); } }
+.cost {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+  align-content: start;
+}
+.cost .plain { font-size: 13px; color: var(--muted); }
+.split {
+  display: flex;
+  height: 14px;
+  border-radius: 7px;
+  overflow: hidden;
+  background: var(--surface);
+}
+.split span { display: block; height: 100%; }
+.split .a { background: var(--accent); }
+.split .b { background: var(--primary); }
+.legend { display: grid; gap: 4px; font-size: 14px; }
+.legend div { display: flex; align-items: baseline; gap: 8px; }
+.legend i {
+  flex: none;
+  width: 10px; height: 10px; border-radius: 2px;
+  display: inline-block;
+  transform: translateY(1px);
+}
+.legend i.a { background: var(--accent); }
+.legend i.b { background: var(--primary); }
+.legend .pctv { font-family: var(--font-num); font-weight: 700; min-width: 3.2em; }
+.cost .extra { font-size: 13px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 10px; }
+
+/* スケジュール */
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+.timeline > li {
+  display: grid;
+  grid-template-columns: 7.5em 20px minmax(0, 1fr);
+  gap: 0 12px;
+}
+.timeline .year { text-align: right; padding-block: 2px 20px; }
+.timeline .year b { display: block; font-family: var(--font-display); font-size: 17px; line-height: 1.4; }
+.timeline .year span { font-size: 12.5px; color: var(--muted); font-family: var(--font-num); }
+.timeline .rail { position: relative; }
+.timeline .rail::before {
+  content: "";
+  position: absolute;
+  left: 9px; top: 0; bottom: 0;
+  width: 2px;
+  background: var(--line);
+}
+.timeline > li:last-child .rail::before { bottom: auto; height: 12px; }
+.timeline .rail::after {
+  content: "";
+  position: absolute;
+  left: 4px; top: 7px;
+  width: 12px; height: 12px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--primary);
+}
+.timeline > li.now .rail::after { background: var(--accent); border-color: var(--accent); }
+.timeline > li.goal .rail::after { background: var(--primary); }
+.timeline .body { padding-bottom: 20px; display: grid; gap: 4px; min-width: 0; }
+.timeline .body ul { margin: 0; padding-left: 1.1em; font-size: 14.5px; line-height: 1.8; }
+.pill {
+  justify-self: start;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 1px 10px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: #232827;
+  letter-spacing: 0.04em;
+}
+.pill.goal { background: var(--primary); color: var(--on-primary); }
+@media (max-width: 480px) {
+  .timeline > li { grid-template-columns: 5.6em 20px minmax(0, 1fr); gap: 0 8px; }
+  .timeline .year b { font-size: 15px; }
+}
+
+/* 効果 */
+.effects {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+@media (max-width: 560px) { .effects { grid-template-columns: minmax(0, 1fr); } }
+.effect {
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 16px 18px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+}
+.effect h3 { font-size: 16.5px; color: var(--primary); }
+.effect p { font-size: 14.5px; line-height: 1.8; }
+
+/* ことばの翻訳 */
+.glossary {
+  background: var(--surface);
+  border-left: 4px solid var(--primary);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 20px 22px;
+  display: grid;
+  gap: 14px;
+}
+.glossary h2::before { display: none; }
+.glossary dl { margin: 0; display: grid; gap: 12px; }
+.glossary dt { font-weight: 700; }
+.glossary dd { margin: 0; font-size: 14.5px; line-height: 1.8; color: var(--ink); }
+
+/* 議員メモ */
+.memo {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 22px;
+  display: grid;
+  gap: 14px;
+  background: var(--card);
+}
+.memo .disclaimer {
+  font-size: 13px;
+  color: var(--muted);
+  padding-bottom: 12px;
+  border-bottom: 1px dashed var(--line);
+}
+.memo ol { margin: 0; padding-left: 1.4em; display: grid; gap: 10px; }
+.memo li::marker { color: var(--primary); font-weight: 700; }
+
+/* 締め帯 */
+.closing {
+  background: var(--band);
+  color: var(--on-dark);
+}
+.closing .inner { padding-block: 36px 40px; display: grid; gap: 12px; }
+.closing .kicker { color: var(--accent); }
+.closing h2 { color: var(--on-dark); }
+.closing h2::before { background: var(--accent); }
+.closing p { color: var(--on-dark-muted); }
+.closing p strong { color: var(--on-dark); }
+.closing .source { font-size: 12.5px; border-top: 1px solid rgba(255,255,255,0.18); padding-top: 14px; margin-top: 8px; line-height: 1.8; }
+</style>
+
+<header class="masthead">
+  <div class="gutter">
+    <div class="wrap inner">
+      <div class="kicker">市政の見える化 ｜ 令和8年10月 全員協議会の報告から</div>
+      <h1>119番を受ける場所が、<br>5つの消防本部で1か所になります</h1>
+      <p class="sub">熊谷・行田・秩父・児玉郡市広域・深谷の5つの消防本部が、119番通報の受付と出動指令を「共同消防指令センター」にまとめる計画です。令和12（2030）年度の運用開始をめざしています。</p>
+      <p class="source">もとの資料：「消防指令業務共同運用に係る任意協議会の協議結果（報告）」熊谷市消防本部 指令課</p>
+    </div>
+  </div>
+</header>
+
+<main class="gutter">
+
+  <div class="wrap summary">
+    <section>
+      <h2>3行でいうと</h2>
+      <ol>
+        <li>熊谷市を含む<strong>5つの消防本部</strong>が、119番の受付と出動の指令を<strong>1か所でまとめて</strong>行います。</li>
+        <li>場所は<strong>深谷市消防本部庁舎の3階</strong>。指令を担当する職員は5本部合計で<strong>62人から38人</strong>になり、その分を現場などに回す計画です。</li>
+        <li>今年度（令和8年度）に各市町の議会で議決し、<strong>令和12（2030）年度に運用開始</strong>の予定です。</li>
+      </ol>
+    </section>
+  </div>
+
+  <div class="wrap-wide tiles" aria-label="主な数字">
+    <div class="tile">
+      <span class="label">指令センターの数</span>
+      <span class="value">4<small>か所 →</small> 1<small>か所</small></span>
+      <span class="note">熊谷・行田はすでに共同運用中のため、現在は4か所</span>
+    </div>
+    <div class="tile">
+      <span class="label">指令を担当する職員</span>
+      <span class="value">62<small>人 →</small> 38<small>人</small></span>
+      <span class="note">5本部の合計。熊谷市は12人 → 10人</span>
+    </div>
+    <div class="tile">
+      <span class="label">カバーする人口</span>
+      <span class="value">約65<small>万人</small></span>
+      <span class="note">5本部の合計 654,089人（住民基本台帳）</span>
+    </div>
+    <div class="tile">
+      <span class="label">運用開始</span>
+      <span class="value">R12<small>年度</small></span>
+      <span class="note">2030年度の予定</span>
+    </div>
+  </div>
+
+  <section class="wrap">
+    <h2>そもそも「消防指令業務」とは</h2>
+    <p>119番に電話すると、つながる先は<strong>「消防指令センター」</strong>です。ここで通報を受けた職員（指令員）が、火事か救急かを聞き取り、場所を特定し、近くの消防署や救急隊に「出動してください」と指令を出します。この一連の仕事が「消防指令業務」です。</p>
+    <div class="analogy">
+      <span class="tag">たとえるなら</span>
+      <p>5つの地域にそれぞれあった<strong>「119番の受付窓口」を、1つの大きな受付センターにまとめる</strong>イメージです。まとめるのは「電話を受けて、出動を指示する」部分です。消防署や救急隊は、これまでどおり各消防本部が運営します。</p>
+    </div>
+    <p>市民のみなさんが119番に電話することは同じで、変わるのは<span class="mark">電話を受ける場所</span>です。熊谷市と行田市はすでに指令センターを共同で運用していて、今回はそれを5つの消防本部に広げる形です。</p>
+  </section>
+
+  <section class="wrap-wide">
+    <h2>いまと、これから</h2>
+    <div class="flow">
+      <div class="col">
+        <span class="col-title">いま（指令センター4か所）</span>
+        <div class="center-box is-kumagaya">
+          <span class="name">熊谷市・行田市 消防指令センター</span>
+          <span class="area">熊谷市、行田市（すでに共同運用）</span>
+        </div>
+        <div class="center-box">
+          <span class="name">深谷市消防本部</span>
+          <span class="area">深谷市、寄居町</span>
+        </div>
+        <div class="center-box">
+          <span class="name">児玉郡市広域消防本部</span>
+          <span class="area">本庄市、美里町、神川町、上里町</span>
+        </div>
+        <div class="center-box">
+          <span class="name">秩父消防本部</span>
+          <span class="area">秩父市、横瀬町、皆野町、長瀞町、小鹿野町</span>
+        </div>
+      </div>
+      <div class="arrow" aria-hidden="true">→</div>
+      <div class="col">
+        <span class="col-title">これから（1か所）</span>
+        <div class="center-box new">
+          <span class="area">（仮称）</span>
+          <span class="name">埼玉北部広域<br>消防指令センター</span>
+          <span class="area">深谷市消防本部庁舎 3階<br>5本部・13市町の119番を受けて、各消防本部の消防隊・救急隊に出動を指令</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>なぜ一緒にやるのか</h2>
+    <p>指令センターのシステムは高機能な専用設備で、定期的な更新と日々の維持に大きなお金がかかります。<strong>物価高でその費用がさらに増えています。</strong>また、限られた消防職員をどう効率よく配置するかも大きな課題です。</p>
+    <p>そこで、次の3つを目的に共同運用の検討が始まりました。</p>
+    <ul>
+      <li>指令システムの更新・維持にかかる費用を減らす</li>
+      <li>指令業務を安定して運用する</li>
+      <li>広い範囲に及ぶ災害への対応力を高める</li>
+    </ul>
+    <p>令和8（2026）年4月に5本部の消防長が「任意協議会」をつくり、協議を始めました。これまでに<strong>任意協議会を8回</strong>、実務担当者による<strong>研究会を13回</strong>開いています。</p>
+  </section>
+
+  <section class="wrap">
+    <h2>これまでに決まったこと</h2>
+    <p class="muted small">任意協議会での協議結果です。右側は、資料に書かれた理由や、ことばの意味をかみくだいたものです。</p>
+    <dl class="decisions">
+      <div class="decision">
+        <dt>組み合わせ</dt>
+        <dd>
+          <span class="what">熊谷・行田・秩父・児玉郡市広域・深谷の5消防本部</span>
+          <span class="why">埼玉県の消防広域化推進計画で「第5ブロック」とされている組み合わせ。もともと県の消防長会でも同じブロックで連携してきました。お互いに隣り合っているので、災害時の応援も素早くできます。</span>
+        </dd>
+      </div>
+      <div class="decision">
+        <dt>やり方</dt>
+        <dd>
+          <span class="what">協議会方式</span>
+          <span class="why">新しい団体はつくらず、職員はもとの消防本部に所属したまま派遣されます。それぞれの消防本部の主体性が保たれるやり方です。</span>
+        </dd>
+      </div>
+      <div class="decision">
+        <dt>場所</dt>
+        <dd>
+          <span class="what">深谷市消防本部庁舎 3階</span>
+          <span class="why">5本部の中枢として必要な広さがあり、地震などの災害時にも拠点になれる機能があること、今ある建物を活かせることが理由です。</span>
+        </dd>
+      </div>
+      <div class="decision">
+        <dt>勤務体制</dt>
+        <dd>
+          <span class="what">1回の当直11人の3交替制。平日勤務の職員と合わせて38人</span>
+          <span class="why">職員を3つの班に分け、交代で24時間センターを動かします。班のメンバーは固定です。</span>
+        </dd>
+      </div>
+      <div class="decision">
+        <dt>費用の分け方</dt>
+        <dd>
+          <span class="what">つくる費用と、動かし続ける費用で別のルール</span>
+          <span class="why">くわしくは下の「お金はどう分けるのか」で説明します。</span>
+        </dd>
+      </div>
+      <div class="decision">
+        <dt>正式な協議会の名前</dt>
+        <dd>
+          <span class="what">（仮称）埼玉北部広域消防指令事務協議会</span>
+          <span class="why">各市町の議会で議決したあとに設置する、法律にもとづく協議会の名前です。</span>
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <section class="wrap-wide">
+    <h2>5つの消防本部のすがた</h2>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">消防本部</th>
+            <th scope="col">管轄する市町</th>
+            <th scope="col">人口</th>
+            <th scope="col">面積（km²）</th>
+            <th scope="col">消防職員</th>
+            <th scope="col">署・分署</th>
+            <th scope="col">指令課員<br>（うち当直）</th>
+            <th scope="col">119番通報<br>（令和7年）</th>
+            <th scope="col">指令システム</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="is-kumagaya">
+            <th scope="row">熊谷市</th>
+            <td class="wrap-cell">熊谷市</td>
+            <td>189,342<span class="pct">28.95%</span></td>
+            <td>159.82<span class="pct">10.50%</span></td>
+            <td>258人</td>
+            <td>6<span class="pct">3署3分署</span></td>
+            <td>12人（10人）</td>
+            <td>15,913件</td>
+            <td>NEC</td>
+          </tr>
+          <tr>
+            <th scope="row">行田市</th>
+            <td class="wrap-cell">行田市</td>
+            <td>77,139<span class="pct">11.79%</span></td>
+            <td>67.49<span class="pct">4.43%</span></td>
+            <td>106人</td>
+            <td>3<span class="pct">1署2分署</span></td>
+            <td>7人（7人）※1</td>
+            <td>6,069件</td>
+            <td>NEC</td>
+          </tr>
+          <tr>
+            <th scope="row">秩父</th>
+            <td class="wrap-cell">秩父市・横瀬町・皆野町・長瀞町・小鹿野町</td>
+            <td>87,874<span class="pct">13.43%</span></td>
+            <td>892.62<span class="pct">58.64%</span></td>
+            <td>182人</td>
+            <td>5<span class="pct">1署4分署</span></td>
+            <td>18人（16人）※6</td>
+            <td>7,017件</td>
+            <td>ゼネラル</td>
+          </tr>
+          <tr>
+            <th scope="row">児玉郡市広域</th>
+            <td class="wrap-cell">本庄市・美里町・神川町・上里町</td>
+            <td>128,632<span class="pct">19.67%</span></td>
+            <td>199.68<span class="pct">13.12%</span></td>
+            <td>216人</td>
+            <td>7<span class="pct">1署6分署</span></td>
+            <td>13人（10人）</td>
+            <td>12,208件</td>
+            <td>沖電気</td>
+          </tr>
+          <tr>
+            <th scope="row">深谷市</th>
+            <td class="wrap-cell">深谷市・寄居町</td>
+            <td>171,102<span class="pct">26.16%</span></td>
+            <td>202.62<span class="pct">13.31%</span></td>
+            <td>234人</td>
+            <td>8<span class="pct">1署7分署</span></td>
+            <td>12人（10人）※2</td>
+            <td>13,438件</td>
+            <td>ゼネラル</td>
+          </tr>
+          <tr class="total">
+            <th scope="row">合計</th>
+            <td class="wrap-cell">13市町</td>
+            <td>654,089</td>
+            <td>1,522.23</td>
+            <td>996人</td>
+            <td>29</td>
+            <td>62人</td>
+            <td>54,645件</td>
+            <td>—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted small">令和8年4月1日現在。人口は住民基本台帳による。％は5本部全体に占める割合。※の数字は当直勤務者に含まれる再任用職員の人数。指令システムとデジタル無線のメーカーは各本部で同じ。合計欄は資料の数字を足し上げたもの。</p>
+    <div class="wrap" style="display:grid;gap:8px;margin-inline:0;max-width:var(--read)">
+      <h3>表から読み取れること</h3>
+      <ul>
+        <li>5本部の119番通報は合わせて<strong>年間54,645件、1日平均で約150件</strong>です。そのうち熊谷市は15,913件で、約3割を占めます。</li>
+        <li>人口は熊谷市が最も多く（28.95%）、面積は秩父が5本部全体の半分以上（58.64%）を占めます。</li>
+        <li>いまは指令システムのメーカーが<strong>NEC・ゼネラル・沖電気の3社に分かれています</strong>。共同センターでは1つのシステムにまとめて整備します。</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="wrap-wide">
+    <h2>人の配置はどう変わるのか</h2>
+    <p style="max-width:var(--read)">共同センターでは、職員を3つの班（第1係〜第3係）に分け、交代で24時間勤務します。各本部から何人ずつ出すかは次のとおりです。今の指令員の数と比べると、5本部合計で<strong>24人少なくなります</strong>。</p>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th scope="col">消防本部</th>
+            <th scope="col">消防職員数</th>
+            <th scope="col">第1係</th>
+            <th scope="col">第2係</th>
+            <th scope="col">第3係</th>
+            <th scope="col">平日勤務</th>
+            <th scope="col" class="key">共同センターへ（a）</th>
+            <th scope="col">今の指令員（b）</th>
+            <th scope="col">差（a−b）</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="is-kumagaya"><th scope="row">熊谷市</th><td>258</td><td>3</td><td>3</td><td>3</td><td>1</td><td class="key">10</td><td>12</td><td>−2</td></tr>
+          <tr><th scope="row">行田市</th><td>106</td><td>1</td><td>1</td><td>2</td><td>0</td><td class="key">4</td><td>7（1）</td><td>−3</td></tr>
+          <tr><th scope="row">秩父</th><td>182</td><td>2</td><td>3</td><td>2</td><td>0</td><td class="key">7</td><td>18（6）</td><td>−11</td></tr>
+          <tr><th scope="row">児玉郡市</th><td>216</td><td>3</td><td>2</td><td>2</td><td>1</td><td class="key">8</td><td>13</td><td>−5</td></tr>
+          <tr><th scope="row">深谷市</th><td>234</td><td>2</td><td>2</td><td>2</td><td>3</td><td class="key">9</td><td>12（2）</td><td>−3</td></tr>
+          <tr class="total"><th scope="row">合計</th><td>996</td><td>11</td><td>11</td><td>11</td><td>5</td><td class="key">38</td><td>62（9）</td><td>−24</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="muted small" style="max-width:var(--read)">（ ）内は再任用職員の人数。「平日勤務」は資料の「毎日勤務者」で、当直ではなく日中に管理・事務を担う職員です。</p>
+    <div style="max-width:var(--read);display:grid;gap:8px">
+      <h3>運用が始まるまでの準備</h3>
+      <p>正式な協議会には、会長（非常勤）と事務局長（センター長）を置きます。運用開始までは、各消防本部から平日勤務の職員を1人ずつ（深谷市消防本部は3人）事務局に出して、開設の準備を進めます。</p>
+    </div>
+  </section>
+
+  <section class="wrap">
+    <h2>お金はどう分けるのか</h2>
+    <p>費用は「つくるお金」と「動かし続けるお金」に分け、それぞれ別のルールで5本部が負担します。どちらも、<strong>5本部が共通で使う部分</strong>についてのルールです。</p>
+    <div class="cost-grid">
+      <div class="cost">
+        <h3>整備費</h3>
+        <span class="plain">つくるお金：システムの共同整備と庁舎の改修</span>
+        <div class="split" role="img" aria-label="均等割10%、基準財政需要額割90%">
+          <span class="a" style="width:10%"></span><span class="b" style="width:90%"></span>
+        </div>
+        <div class="legend">
+          <div><i class="a"></i><span class="pctv">10%</span><span>均等割（5本部で同じ額ずつ）</span></div>
+          <div><i class="b"></i><span class="pctv">90%</span><span>基準財政需要額割</span></div>
+        </div>
+        <p class="extra">各本部だけで使う部分（自賄部分）は、それぞれが負担</p>
+      </div>
+      <div class="cost">
+        <h3>維持管理費</h3>
+        <span class="plain">動かし続けるお金：毎年の運用・保守</span>
+        <div class="split" role="img" aria-label="人口割50%、基準財政需要額割50%">
+          <span class="a" style="width:50%"></span><span class="b" style="width:50%"></span>
+        </div>
+        <div class="legend">
+          <div><i class="a"></i><span class="pctv">50%</span><span>人口割（人口に応じて）</span></div>
+          <div><i class="b"></i><span class="pctv">50%</span><span>基準財政需要額割</span></div>
+        </div>
+        <p class="extra">各本部だけで使う部分（自賄部分）は、それぞれが負担</p>
+      </div>
+    </div>
+    <p class="small muted">今回の資料では、具体的な金額は示されていません。なお、熊谷市は5本部の中で人口が最も多い（28.95%）ため、維持管理費のうち人口割の部分では、熊谷市の負担割合が最も大きくなります。</p>
+  </section>
+
+  <section class="wrap">
+    <h2>これからのスケジュール</h2>
+    <ol class="timeline">
+      <li class="now">
+        <div class="year"><b>令和8年度</b><span>2026</span></div>
+        <div class="rail"></div>
+        <div class="body">
+          <span class="pill">いまここ</span>
+          <ul>
+            <li>任意協議会で協議（4月〜）</li>
+            <li>基本構想の策定、システムの仕様書づくり</li>
+            <li><strong>各市町の議会で議決</strong>（熊谷市議会も含む）</li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="year"><b>令和9年度</b><span>2027</span></div>
+        <div class="rail"></div>
+        <div class="body">
+          <ul>
+            <li>正式な協議会（法定協議会）を設置</li>
+            <li>指令システムの基本設計・実施設計（またはプロポーザル）</li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="year"><b>令和10年度</b><span>2028</span></div>
+        <div class="rail"></div>
+        <div class="body">
+          <ul>
+            <li>指令システムの設計</li>
+            <li>深谷市消防本部庁舎の改修設計</li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <div class="year"><b>令和11年度</b><span>2029</span></div>
+        <div class="rail"></div>
+        <div class="body">
+          <ul>
+            <li>庁舎の改修工事</li>
+            <li>指令システムの整備</li>
+          </ul>
+        </div>
+      </li>
+      <li class="goal">
+        <div class="year"><b>令和12年度</b><span>2030</span></div>
+        <div class="rail"></div>
+        <div class="body">
+          <span class="pill goal">運用開始</span>
+          <ul>
+            <li>システム機器の据え付け、運用訓練、システムの切り替え</li>
+            <li>（仮称）埼玉北部広域消防指令センターの<strong>運用開始</strong>（工程表では年度の後半）</li>
+          </ul>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <section class="wrap">
+    <h2>期待される効果</h2>
+    <div class="effects">
+      <div class="effect">
+        <h3>費用を減らせる</h3>
+        <p>5本部で1つのシステムを共同で整備し、それぞれが単独で更新するより費用を抑えます。</p>
+      </div>
+      <div class="effect">
+        <h3>24時間の指令体制が強くなる</h3>
+        <p>1回の当直11人という大きなチームで、24時間指令にあたります。</p>
+      </div>
+      <div class="effect">
+        <h3>現場の人手を増やせる</h3>
+        <p>指令を担当する職員を62人から38人にし、その分を現場などに配置します。</p>
+      </div>
+      <div class="effect">
+        <h3>災害時の応援がスムーズに</h3>
+        <p>隣り合う5本部が1か所で指令を出すことで、災害時の応援の初動を強めます。</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="wrap glossary" aria-labelledby="glossary-title">
+    <h2 id="glossary-title">💡ことばの翻訳</h2>
+    <dl>
+      <div><dt>消防指令業務</dt><dd>119番通報を受けて、どの消防隊・救急隊を出すかを決め、出動の指令を出す仕事。</dd></div>
+      <div><dt>共同運用</dt><dd>複数の消防本部が、1つの施設とシステムを一緒に使って仕事をすること。</dd></div>
+      <div><dt>任意協議会／法定協議会</dt><dd>任意協議会は、法律にもとづかない話し合いの場（今回は5本部の消防長で構成）。法定協議会は、地方自治法にもとづき、各市町の議会の議決を経てつくる正式な協議会で、共同運用を実際に担います。</dd></div>
+      <div><dt>協議会方式</dt><dd>新しい団体（一部事務組合など）をつくらずに、協議会で仕事を共同で行うやり方。職員はもとの消防本部の所属のまま派遣されます。</dd></div>
+      <div><dt>基準財政需要額</dt><dd>国が地方交付税を計算するために、各自治体が標準的な行政サービスを行うのに必要な額を、決まったルールで計算したもの。自治体の「標準的な必要経費」の目安です。</dd></div>
+      <div><dt>均等割・人口割</dt><dd>費用を同じ額ずつ分けるのが均等割、人口の多さに応じて分けるのが人口割。</dd></div>
+      <div><dt>自賄（じまかない）部分</dt><dd>共通の設備ではなく、それぞれの消防本部だけが使う設備の部分。</dd></div>
+      <div><dt>3交替制・当直</dt><dd>職員を3つの班に分けて、交代で24時間勤務する体制。泊まりがけの勤務を当直といいます。</dd></div>
+      <div><dt>再任用職員</dt><dd>定年で退職したあと、もう一度採用されて働いている職員。</dd></div>
+      <div><dt>全員協議会</dt><dd>議員全員が集まり、市から大事なことの説明を受けたり、意見を交わしたりする場。ここでは議決はしません。</dd></div>
+    </dl>
+  </aside>
+
+  <section class="wrap memo" aria-labelledby="memo-title">
+    <h2 id="memo-title">議会で確認していきたい点</h2>
+    <p class="disclaimer">ここから下は資料の内容ではなく、熊谷市議会議員としての問題意識です。今年度の議決に向けて、次の点を確認していきます。</p>
+    <ol>
+      <li><strong>熊谷市の負担はいくらになるのか。</strong>今回の資料は分担の割合だけで、金額がありません。熊谷・行田で単独に更新する場合と比べて、どれだけ減るのかを確認したいところです。</li>
+      <li><strong>受付の場所が深谷市内に移っても、対応の速さと質は保てるのか。</strong>熊谷市内の地理に詳しい職員による対応や、通報から出動までの時間がどう守られるのか。</li>
+      <li><strong>減る24人（熊谷市は2人）は、どこに配置されるのか。</strong>「現場要員の増強」の中身と、再任用職員の扱いを含めて確認が必要です。</li>
+      <li><strong>メーカーの違うシステムや無線をどうまとめるのか。</strong>今のシステムの更新時期や、運用開始までのつなぎの費用も気になります。</li>
+      <li><strong>熊谷市の今の指令センターの設備は、運用開始後どうなるのか。</strong></li>
+    </ol>
+  </section>
+
+</main>
+
+<footer class="closing">
+  <div class="gutter">
+    <div class="wrap inner">
+      <span class="kicker">市民のみなさんへ</span>
+      <h2>決まるのは、今年度の議会です</h2>
+      <p>この共同運用は、<strong>令和8年度中に熊谷市議会を含む各市町の議会で議決</strong>される予定です。議会の審議は傍聴できます。疑問や意見があれば、ぜひ議員に届けてください。</p>
+      <p class="source">出典：「消防指令業務共同運用に係る任意協議会の協議結果（報告）」令和8年10月全員協議会報告、熊谷市消防本部指令課（別紙資料を含む）。数字は令和8年4月1日現在。合計欄と1日あたりの件数は、資料の数字をもとに計算したものです。</p>
+    </div>
+  </div>
+</footer>
